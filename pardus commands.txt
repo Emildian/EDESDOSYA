@@ -1,0 +1,14 @@
+xfce4-panel --restart
+çubuklar yok ekran siyahsa çözer
+
+pulseaudio -k
+ses problemi çözer
+
+usb olduğu klasöre gel dosyalarda ctrl+h usb 
+eğer doluysa ama gözükmüyorsa flash
+
+sudo systemctl restart NetworkManager
+internet var ama bişey yapılamıyorsa çözer
+
+xkill
+eğer uygulama kapanmıyorsa yaz sol tıkla modu kapatmak için sağ tıkla çözer
