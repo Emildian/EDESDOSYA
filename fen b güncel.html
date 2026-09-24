@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>6. Sınıf Fen Bilimleri YEK Oyunu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --p1-color: #3b82f6;
+      --p1-dark: #1d4ed8;
+      --p2-color: #ef4444;
+      --p2-dark: #b91c1c;
+      --bg-dark: #090d16;
+      --card-bg: #151d2a;
+      --accent: #f59e0b;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --text: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg-dark);
+      background-image: radial-gradient(circle at 50% 20%, #1e293b 0%, #090d16 80%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      overflow-x: hidden;
+    }
+
+    /* Target Banner / Header */
+    .header-bar {
+      width: 100%;
+      max-width: 900px;
+      background: rgba(21, 29, 42, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 2px solid rgba(255,255,255,0.1);
+      margin-bottom: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    .target-badge {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 900;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.1rem;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* Scoreboard & Progress */
+    .scoreboard {
+      width: 100%;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .team-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 12px 16px;
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .team-card.p1 { border-color: var(--p1-color); }
+    .team-card.p2 { border-color: var(--p2-color); }
+
+    .team-card.active-turn {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .team-card.active-turn::after {
+      content: 'SIRA SENDE!';
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      font-size: 0.7rem;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.2);
+    }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .team-name {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .team-score {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+    }
+
+    .p1 .team-score { color: #60a5fa; }
+    .p2 .team-score { color: #f87171; }
+
+    .progress-outer {
+      width: 100%;
+      height: 12px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-inner {
+      height: 100%;
+      width: 0%;
+      transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-radius: 6px;
+    }
+
+    .p1 .progress-inner { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .p2 .progress-inner { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    /* Main Container */
+    .game-container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 25px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      position: relative;
+      min-height: 480px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Modals Setup */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(9, 13, 22, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.hidden {
+      display: none !important;
+      pointer-events: none !important;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      max-width: 520px;
+      width: 100%;
+      padding: 30px;
+      border-radius: 24px;
+      border: 2px solid rgba(255,255,255,0.15);
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+    }
+
+    .modal-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+
+    .mode-btn {
+      width: 100%;
+      padding: 16px;
+      margin: 10px 0;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      background: #1e293b;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .mode-btn:hover {
+      background: #334155;
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+
+    /* Concept Header */
+    .concept-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid rgba(255,255,255,0.08);
+    }
+
+    .concept-tag {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      font-family: 'Fredoka', sans-serif;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .turn-indicator {
+      font-size: 0.95rem;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 12px;
+    }
+
+    .turn-p1 { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .turn-p2 { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+    /* CONCEPTS STYLES */
+    .sort-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex-grow: 1;
+    }
+
+    .sort-item-card {
+      background: #1e293b;
+      padding: 22px;
+      border-radius: 16px;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      border: 2px dashed rgba(255,255,255,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      color: #38bdf8;
+    }
+
+    .buckets-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .bucket-btn {
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bucket-btn:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    .scenario-box {
+      background: rgba(9, 13, 22, 0.7);
+      padding: 20px;
+      border-radius: 16px;
+      border-left: 5px solid var(--accent);
+      font-size: 1.15rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-btn {
+      background: #1e293b;
+      border: 2px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .opt-btn:hover {
+      background: #334155;
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+
+    .odd-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .odd-card {
+      background: #1e293b;
+      padding: 18px;
+      border-radius: 14px;
+      border: 2px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      font-size: 1.05rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .odd-card:hover {
+      background: #334155;
+      border-color: var(--accent);
+      transform: scale(1.02);
+    }
+
+    /* Feedback Modal */
+    .feedback-box {
+      display: flex;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(9, 13, 22, 0.96);
+      border-radius: 20px;
+      z-index: 50;
+      padding: 30px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .feedback-box.hidden {
+      display: none !important;
+      pointer-events: none !important;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .fb-icon {
+      font-size: 4rem;
+      margin-bottom: 10px;
+    }
+
+    .fb-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    .fb-title.correct { color: var(--success); }
+    .fb-title.wrong { color: var(--danger); }
+
+    .fb-desc {
+      font-size: 1.15rem;
+      color: #cbd5e1;
+      max-width: 600px;
+      margin-bottom: 25px;
+      line-height: 1.6;
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    .next-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 14px 36px;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 900;
+      font-family: 'Fredoka', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+
+    .next-btn:hover {
+      transform: scale(1.05);
+      background: #fbbf24;
+    }
+
+    .penalty-tag {
+      color: #f87171;
+      font-weight: 900;
+      font-size: 1.2rem;
+      margin-top: 5px;
+    }
+
+    .reward-tag {
+      color: #4ade80;
+      font-weight: 900;
+      font-size: 1.2rem;
+      margin-top: 5px;
+    }
+
+    @media (max-width: 640px) {
+      .scoreboard { grid-template-columns: 1fr; }
+      .options-grid, .buckets-grid, .odd-grid { grid-template-columns: 1fr; }
+      .game-container { padding: 15px; min-height: 420px; }
+      .team-score { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Banner -->
+  <div class="header-bar">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-size: 1.5rem;">🪐</span>
+      <h2 style="font-family:'Fredoka', sans-serif; font-size:1.2rem;">GÜNEŞ SİSTEMİ YEK OYUNU</h2>
+    </div>
+    <div class="target-badge">HEDEF: 20 PUAN</div>
+  </div>
+
+  <!-- Scoreboard -->
+  <div class="scoreboard">
+    <div class="team-card p1 active-turn" id="card-p1">
+      <div class="team-header">
+        <span class="team-name" id="name-p1">🚀 1. Takım</span>
+        <span class="team-score" id="score-p1">0 / 20</span>
+      </div>
+      <div class="progress-outer">
+        <div class="progress-inner" id="prog-p1"></div>
+      </div>
+    </div>
+
+    <div class="team-card p2" id="card-p2">
+      <div class="team-header">
+        <span class="team-name" id="name-p2">🛸 2. Takım</span>
+        <span class="team-score" id="score-p2">0 / 20</span>
+      </div>
+      <div class="progress-outer">
+        <div class="progress-inner" id="prog-p2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Game Area -->
+  <div class="game-container">
+    
+    <div class="concept-header">
+      <span class="concept-tag" id="concept-tag">KONSEPT: KATEGORİLEŞTİRME</span>
+      <span class="turn-indicator turn-p1" id="turn-indicator">Sıra: 1. Takım</span>
+    </div>
+
+    <div id="game-area" style="flex-grow:1; display:flex; flex-direction:column; justify-content:center;">
+      <!-- Dynamic Question Content -->
+    </div>
+
+    <!-- Feedback Layer -->
+    <div class="feedback-box hidden" id="feedback-box">
+      <div class="fb-icon" id="fb-icon">🎯</div>
+      <div class="fb-title" id="fb-title">DOĞRU CEVAP!</div>
+      <div id="fb-point" class="reward-tag">+1 Puan</div>
+      <div class="fb-desc" id="fb-desc">Açıklama metni.</div>
+      <button class="next-btn" id="btn-next">DEVAM ET ➔</button>
+    </div>
+
+  </div>
+
+  <!-- Start Modal -->
+  <div class="modal-overlay" id="start-modal">
+    <div class="modal-content">
+      <div style="font-size: 3.5rem; margin-bottom: 10px;">🌞</div>
+      <h1 class="modal-title">GÜNEŞ SİSTEMİ YARIŞI</h1>
+      <p style="color: #cbd5e1; margin-bottom: 20px; font-size: 0.95rem;">
+        6. Sınıf Fen Bilimleri YEK Güneş Sitemi Oyunu<br><br>
+        🎯 <b>Kural</b> 20 puana ulaşan ilk takım kazanır!<br>
+        ✅ <b>Doğru Cevap:</b> +1 Puan<br>
+        ❌ <b>Yanlış Cevap:</b> -1 Puan
+      </p>
+
+      <button class="mode-btn" id="btn-start-2p">
+        <span>👥</span> 2 Takım / 2 Oyuncu Yarışsın
+      </button>
+      <button class="mode-btn" id="btn-start-bot" style="background: #0f172a;">
+        <span>🤖</span> Bilgisayara (Bot) Karşı Oyna
+      </button>
+    </div>
+  </div>
+
+  <!-- Game Over Modal -->
+  <div class="modal-overlay hidden" id="end-modal">
+    <div class="modal-content">
+      <div style="font-size: 4rem; margin-bottom: 10px;">🏆</div>
+      <h1 class="modal-title" id="winner-title">ŞAMPİYON!</h1>
+      <p id="winner-desc" style="font-size: 1.2rem; margin-bottom: 25px; color:#e2e8f0;"></p>
+      <button class="next-btn" onclick="location.reload()">YENİDEN OYNA 🔄</button>
+    </div>
+  </div>
+
+  <script>
+    let audioCtx = null;
+    
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'correct') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(130, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      }
+    }
+
+    let gameMode = '2P';
+    let scores = { p1: 0, p2: 0 };
+    let currentTurn = 'p1';
+    let targetScore = 20;
+    let poolIndex = 0;
+
+    /* Güneş Sistemi Soru Havuzu */
+    const questionPool = [
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Gezegen Türünü Doğru Kategoriye At!',
+        item: 'Jüpiter',
+        buckets: [
+          { name: 'İç (Karasal) Gezegen', correct: false },
+          { name: 'Dış (Gazsal) Gezegen', correct: true }
+        ],
+        explain: 'Jüpiter, Güneş sisteminin en büyük gaz devidir ve Dış (Gazsal) gezegenler sınıfındadır.'
+      },
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Gezegen Türünü Doğru Kategoriye At!',
+        item: 'Venüs',
+        buckets: [
+          { name: 'İç (Karasal) Gezegen', correct: true },
+          { name: 'Dış (Gazsal) Gezegen', correct: false }
+        ],
+        explain: 'Venüs, Güneş\'e yakın ilk 4 gezegenden biridir ve yapısı taş/kayadan oluşan İç (Karasal) gezegendir.'
+      },
+      {
+        concept: 'ODD_ONE_OUT',
+        title: 'Aykırı Olanı Bul! Hangisi Güneş Sistemindeki bir İÇ (Karasal) Gezegendir?',
+        items: [
+          { text: 'Satürn', correct: false },
+          { text: 'Mars', correct: true }, // Inner planet
+          { text: 'Uranüs', correct: false },
+          { text: 'Neptün', correct: false }
+        ],
+        explain: 'Merkür, Venüs, Dünya ve Mars İç (Karasal) gezegenlerdir. Satürn, Uranüs ve Neptün ise Dış gezegenlerdir.'
+      },
+      {
+        concept: 'SCENARIO_MATCH',
+        title: 'Uzay Araştırması & Özel İsim',
+        scenario: 'Yüzeyindeki demir oksitten (pas) dolayı kızıl bir görünüme sahip olan, Dünya\'ya benzeyen iklim izleri bulunan ve "Kızıl Gezegen" olarak bilinen komşumuz hangisidir?',
+        options: [
+          { text: 'Mars', correct: true },
+          { text: 'Merkür', correct: false },
+          { text: 'Jüpiter', correct: false },
+          { text: 'Uranüs', correct: false }
+        ],
+        explain: 'Yüzeyindeki kızıl toz ve kayaçlar sebebiyle Mars\'a "Kızıl Gezegen" denmektedir.'
+      },
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Bu Gezegenin Halkası Var mı?',
+        item: 'Satürn',
+        buckets: [
+          { name: 'Belirgin Halkaları Var', correct: true },
+          { name: 'Halkası Yoktur', correct: false }
+        ],
+        explain: 'Satürn, buz ve kaya parçalarından oluşan muhteşem ve belirgin halka sistemiyle tanınır.'
+      },
+      {
+        concept: 'ODD_ONE_OUT',
+        title: 'Aykırı Olanı Bul! Hangisi Uyduya Sahip DEĞİLDİR?',
+        items: [
+          { text: 'Dünya', correct: false },
+          { text: 'Jüpiter', correct: false },
+          { text: 'Merkür', correct: true }, // No moon
+          { text: 'Mars', correct: false }
+        ],
+        explain: 'Güneş sistemindeki Merkür ve Venüs gezegenlerinin hiç uydusu yoktur.'
+      },
+      {
+        concept: 'SCENARIO_MATCH',
+        title: 'Sıcaklık Özelliği',
+        scenario: 'Güneş\'e en yakın gezegen Merkür olmasına rağmen, atmosferindeki yoğun karbondioksit gazlarının sera etkisi yapması nedeniyle Güneş sisteminin EN SICAK gezegeni hangisidir?',
+        options: [
+          { text: 'Venüs', correct: true },
+          { text: 'Merkür', correct: false },
+          { text: 'Mars', correct: false },
+          { text: 'Dünya', correct: false }
+        ],
+        explain: 'Venüs yoğun atmosferindeki sera etkisi yüzünden Merkür\'den daha sıcaktır (yaklaşık 460°C).'
+      },
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Gezegen Türünü Doğru Kategoriye At!',
+        item: 'Neptün',
+        buckets: [
+          { name: 'İç (Karasal) Gezegen', correct: false },
+          { name: 'Dış (Gazsal) Gezegen', correct: true }
+        ],
+        explain: 'Neptün Güneş\'e en uzak Dış (Gazsal) gezegendir.'
+      },
+      {
+        concept: 'ODD_ONE_OUT',
+        title: 'Aykırı Olanı Bul! Hangisi Asteroit Kuşağı\'nın Konumunu Doğru Gösterir?',
+        items: [
+          { text: 'Merkür ile Venüs Arasında', correct: false },
+          { text: 'Mars ile Jüpiter Arasında', correct: true },
+          { text: 'Dünya ile Mars Arasında', correct: false },
+          { text: 'Satürn ile Uranüs Arasında', correct: false }
+        ],
+        explain: 'Asteroit Kuşağı, İç gezegenlerin sonuncusu olan Mars ile Dış gezegenlerin ilki olan Jüpiter arasında yer alır.'
+      },
+      {
+        concept: 'SCENARIO_MATCH',
+        title: 'Dönüş Yönü Aykırılığı',
+        scenario: 'Güneş sistemindeki gezegenlerin çoğu kendi etrafında saat yönünün tersine dönerken, kendi etrafında ters yönde (saat yönünde) dönen gezegen hangisidir?',
+        options: [
+          { text: 'Venüs', correct: true },
+          { text: 'Dünya', correct: false },
+          { text: 'Mars', correct: false },
+          { text: 'Jüpiter', correct: false }
+        ],
+        explain: 'Venüs, diğer gezegenlerin aksine doğudan batıya (saat yönünde) döner.'
+      },
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Gezegen Konumu',
+        item: 'Güneş\'e Yakınlık Bakımından 3. Sıradaki Gezegen',
+        buckets: [
+          { name: 'Dünya', correct: true },
+          { name: 'Mars', correct: false }
+        ],
+        explain: 'Güneş\'e yakınlık sırası: Merkür, Venüs, DÜNYA, Mars, Jüpiter, Satürn, Uranüs, Neptün.'
+      },
+      {
+        concept: 'ODD_ONE_OUT',
+        title: 'Aykırı Olanı Bul! Yan yatarak (varil gibi) dönen gezegen hangisidir?',
+        items: [
+          { text: 'Uranüs', correct: true },
+          { text: 'Neptün', correct: false },
+          { text: 'Satürn', correct: false },
+          { text: 'Jüpiter', correct: false }
+        ],
+        explain: 'Uranüs dönme eksenindeki eğiklik nedeniyle yörüngesinde yuvarlanan bir varil gibi yan yatarak döner.'
+      },
+      {
+        concept: 'SCENARIO_MATCH',
+        title: 'Gök Taşları ve Meteorlar',
+        scenario: 'Dünya atmosferine giren gök taşlarının sürtünmeden dolayı yanıp ışık saçması olayına halk arasında ne ad verilir?',
+        options: [
+          { text: 'Yıldız Kayması (Meteor)', correct: true },
+          { text: 'Güneş Tutulması', correct: false },
+          { text: 'Gezegen Hizalanması', correct: false },
+          { text: 'Süpernova', correct: false }
+        ],
+        explain: 'Atmosphere girip yanan meteorların bıraktığı ışıklı iz halk arasında "yıldız kayması" olarak bilinir.'
+      },
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Meteorit mi Meteor mu?',
+        item: 'Atmosferde tamamen yanmayıp yeryüzüne ulaşan gök taşı parçası',
+        buckets: [
+          { name: 'Meteorit (Gök Taşı)', correct: true },
+          { name: 'Meteor', correct: false }
+        ],
+        explain: 'Yeryüzüne düşebilen parçalara Meteorit (Gök Taşı), düştüğü yerde açtığı çukura ise Gök Taşı Çukuru denir.'
+      },
+      {
+        concept: 'ODD_ONE_OUT',
+        title: 'Aykırı Olanı Bul! Güneş Sisteminin En Büyük Gezegeni Hangisidir?',
+        items: [
+          { text: 'Güneş', correct: false }, // Star, not planet
+          { text: 'Jüpiter', correct: true },
+          { text: 'Satürn', correct: false },
+          { text: 'Dünya', correct: false }
+        ],
+        explain: 'Güneş bir yıldızdır. Güneş Sistemindeki en büyük GEZEGEN ise Jüpiter\'dir.'
+      }
+    ];
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function startGame(mode) {
+      initAudio();
+      gameMode = mode;
+      document.getElementById('start-modal').classList.add('hidden');
+      if (mode === 'BOT') {
+        document.getElementById('name-p2').innerText = '🤖 Bilgisayar (Bot)';
+      }
+      shuffle(questionPool);
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = questionPool[poolIndex % questionPool.length];
+      const area = document.getElementById('game-area');
+      area.innerHTML = '';
+
+      const turnInd = document.getElementById('turn-indicator');
+      const conceptTag = document.getElementById('concept-tag');
+
+      if (currentTurn === 'p1') {
+        turnInd.className = 'turn-indicator turn-p1';
+        turnInd.innerText = 'Sıra: 1. Takım (Mavi)';
+        document.getElementById('card-p1').classList.add('active-turn');
+        document.getElementById('card-p2').classList.remove('active-turn');
+      } else {
+        turnInd.className = 'turn-indicator turn-p2';
+        turnInd.innerText = gameMode === 'BOT' ? 'Sıra: Bilgisayar (Bot)' : 'Sıra: 2. Takım (Kırmızı)';
+        document.getElementById('card-p2').classList.add('active-turn');
+        document.getElementById('card-p1').classList.remove('active-turn');
+      }
+
+      if (q.concept === 'BUCKET_SORT') {
+        conceptTag.innerText = 'KONSEPT 1: SEPETE AT (SINIFLANDIRMA)';
+        
+        const container = document.createElement('div');
+        container.className = 'sort-container';
+        
+        const title = document.createElement('h3');
+        title.style.cssText = 'text-align:center; color:#cbd5e1; font-size:1.1rem;';
+        title.innerText = q.title;
+
+        const itemCard = document.createElement('div');
+        itemCard.className = 'sort-item-card';
+        itemCard.innerText = `🪐 "${q.item}"`;
+
+        const grid = document.createElement('div');
+        grid.className = 'buckets-grid';
+
+        q.buckets.forEach(b => {
+          const btn = document.createElement('button');
+          btn.className = 'bucket-btn';
+          btn.innerHTML = `<span style="font-size:1.8rem;">📦</span><span>${b.name}</span>`;
+          btn.addEventListener('click', () => handleAnswer(b.correct, q.explain));
+          grid.appendChild(btn);
+        });
+
+        container.appendChild(title);
+        container.appendChild(itemCard);
+        container.appendChild(grid);
+        area.appendChild(container);
+
+      } else if (q.concept === 'SCENARIO_MATCH') {
+        conceptTag.innerText = 'KONSEPT 2: UZAY DEDEKTİFİ & SENARYO';
+
+        const container = document.createElement('div');
+        
+        const title = document.createElement('h3');
+        title.style.cssText = 'text-align:center; color:#cbd5e1; font-size:1.1rem; margin-bottom:12px;';
+        title.innerText = q.title;
+
+        const scenerio = document.createElement('div');
+        scenerio.className = 'scenario-box';
+        scenerio.innerText = `📖 ${q.scenario}`;
+
+        const grid = document.createElement('div');
+        grid.className = 'options-grid';
+
+        shuffle([...q.options]).forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'opt-btn';
+          btn.innerText = opt.text;
+          btn.addEventListener('click', () => handleAnswer(opt.correct, q.explain));
+          grid.appendChild(btn);
+        });
+
+        container.appendChild(title);
+        container.appendChild(scenerio);
+        container.appendChild(grid);
+        area.appendChild(container);
+
+      } else if (q.concept === 'ODD_ONE_OUT') {
+        conceptTag.innerText = 'KONSEPT 3: DOĞRUYU / AYKIRI OLANI BUL';
+
+        const container = document.createElement('div');
+        
+        const title = document.createElement('h3');
+        title.style.cssText = 'text-align:center; color:#cbd5e1; font-size:1.1rem; margin-bottom:12px;';
+        title.innerText = q.title;
+
+        const grid = document.createElement('div');
+        grid.className = 'odd-grid';
+
+        shuffle([...q.items]).forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'odd-card';
+          card.innerHTML = `<span style="font-size:1.3rem;">🚀</span><span>${item.text}</span>`;
+          card.addEventListener('click', () => handleAnswer(item.correct, q.explain));
+          grid.appendChild(card);
+        });
+
+        container.appendChild(title);
+        container.appendChild(grid);
+        area.appendChild(container);
+      }
+
+      if (gameMode === 'BOT' && currentTurn === 'p2') {
+        setTimeout(() => {
+          const isCorrect = Math.random() < 0.75;
+          handleAnswer(isCorrect, q.explain);
+        }, 1200);
+      }
+    }
+
+    function handleAnswer(isCorrect, explanation) {
+      const fbBox = document.getElementById('feedback-box');
+      const fbTitle = document.getElementById('fb-title');
+      const fbIcon = document.getElementById('fb-icon');
+      const fbPoint = document.getElementById('fb-point');
+      const fbDesc = document.getElementById('fb-desc');
+
+      if (isCorrect) {
+        playSound('correct');
+        scores[currentTurn] = Math.min(targetScore, scores[currentTurn] + 1);
+        fbIcon.innerText = '🌟';
+        fbTitle.innerText = 'DOĞRU CEVAP!';
+        fbTitle.className = 'fb-title correct';
+        fbPoint.innerText = '+1 Puan Kazanıldı!';
+        fbPoint.className = 'reward-tag';
+      } else {
+        playSound('wrong');
+        scores[currentTurn] = Math.max(0, scores[currentTurn] - 1);
+        fbIcon.innerText = '💥';
+        fbTitle.innerText = 'YANLIŞ CEVAP!';
+        fbTitle.className = 'fb-title wrong';
+        fbPoint.innerText = '-1 Puan Ceza!';
+        fbPoint.className = 'penalty-tag';
+      }
+
+      fbDesc.innerText = explanation;
+      updateScoreboard();
+
+      if (scores[currentTurn] >= targetScore) {
+        setTimeout(() => showWinner(currentTurn), 500);
+        return;
+      }
+
+      fbBox.classList.remove('hidden');
+    }
+
+    function nextTurn() {
+      document.getElementById('feedback-box').classList.add('hidden');
+      poolIndex++;
+      currentTurn = (currentTurn === 'p1') ? 'p2' : 'p1';
+      loadQuestion();
+    }
+
+    function updateScoreboard() {
+      document.getElementById('score-p1').innerText = `${scores.p1} / ${targetScore}`;
+      document.getElementById('score-p2').innerText = `${scores.p2} / ${targetScore}`;
+
+      const pctP1 = (scores.p1 / targetScore) * 100;
+      const pctP2 = (scores.p2 / targetScore) * 100;
+
+      document.getElementById('prog-p1').style.width = `${pctP1}%`;
+      document.getElementById('prog-p2').style.width = `${pctP2}%`;
+    }
+
+    function showWinner(winner) {
+      document.getElementById('feedback-box').classList.add('hidden');
+      const modal = document.getElementById('end-modal');
+      const title = document.getElementById('winner-title');
+      const desc = document.getElementById('winner-desc');
+
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+
+      if (winner === 'p1') {
+        title.innerText = '🥇 1. TAKIM KAZANDI!';
+        title.style.color = '#60a5fa';
+        desc.innerText = 'Tebrikler! 20 Puana ulaşarak Güneş Sistemi ve Gezegenler Şampiyonu oldun!';
+      } else {
+        const winnerName = gameMode === 'BOT' ? 'BİLGİSAYAR' : '2. TAKIM';
+        title.innerText = `🥇 ${winnerName} KAZANDI!`;
+        title.style.color = '#f87171';
+        desc.innerText = `${winnerName} 20 puana ulaşarak uzay yarışını tamamladı!`;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    // Attach base event listeners safely
+    document.getElementById('btn-start-2p').addEventListener('click', () => startGame('2P'));
+    document.getElementById('btn-start-bot').addEventListener('click', () => startGame('BOT'));
+    document.getElementById('btn-next').addEventListener('click', nextTurn);
+  </script>
+</body>
+</html>

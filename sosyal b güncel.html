@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sosyal Bilgiler YEK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --p1-color: #3b82f6;
+      --p1-dark: #1d4ed8;
+      --p2-color: #ef4444;
+      --p2-dark: #b91c1c;
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #f59e0b;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --text: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      overflow-x: hidden;
+    }
+
+    .header-bar {
+      width: 100%;
+      max-width: 900px;
+      background: rgba(30, 41, 59, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 2px solid rgba(255,255,255,0.1);
+      margin-bottom: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 10;
+    }
+
+    .target-badge {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 900;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.1rem;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .scoreboard {
+      width: 100%;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .team-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 12px 16px;
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .team-card.p1 { border-color: var(--p1-color); }
+    .team-card.p2 { border-color: var(--p2-color); }
+
+    .team-card.active-turn {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .team-card.active-turn::after {
+      content: 'SIRA SENDE!';
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      font-size: 0.7rem;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.2);
+    }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .team-name {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .team-score {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+    }
+
+    .p1 .team-score { color: #60a5fa; }
+    .p2 .team-score { color: #f87171; }
+
+    .progress-outer {
+      width: 100%;
+      height: 12px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-inner {
+      height: 100%;
+      width: 0%;
+      transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-radius: 6px;
+    }
+
+    .p1 .progress-inner { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .p2 .progress-inner { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    .game-container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 25px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      position: relative;
+      min-height: 480px;
+      display: flex;
+      flex-direction: column;
+      z-index: 5;
+    }
+
+    /* Modal / Setup Screen - STRICT HIDING RULES FOR CLICKABILITY */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      pointer-events: auto;
+    }
+
+    .modal-overlay.hidden {
+      display: none !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      max-width: 500px;
+      width: 100%;
+      padding: 30px;
+      border-radius: 24px;
+      border: 2px solid rgba(255,255,255,0.15);
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 1001;
+    }
+
+    .modal-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+
+    .mode-btn {
+      width: 100%;
+      padding: 16px;
+      margin: 10px 0;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      background: #334155;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      position: relative;
+      z-index: 1002;
+    }
+
+    .mode-btn:hover {
+      background: #475569;
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+
+    .concept-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid rgba(255,255,255,0.08);
+    }
+
+    .concept-tag {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      font-family: 'Fredoka', sans-serif;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .turn-indicator {
+      font-size: 1rem;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 12px;
+    }
+
+    .turn-p1 { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .turn-p2 { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+    .sort-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex-grow: 1;
+    }
+
+    .sort-item-card {
+      background: #334155;
+      padding: 20px;
+      border-radius: 16px;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border: 2px dashed rgba(255,255,255,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .buckets-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .bucket-btn {
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .bucket-btn:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    .scenario-box {
+      background: rgba(15, 23, 42, 0.6);
+      padding: 20px;
+      border-radius: 16px;
+      border-left: 5px solid var(--accent);
+      font-size: 1.15rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-btn {
+      background: #334155;
+      border: 2px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      text-align: left;
+      transition: all 0.2s;
+      position: relative;
+      z-index: 10;
+    }
+
+    .opt-btn:hover {
+      background: #475569;
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+
+    .odd-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .odd-card {
+      background: #334155;
+      padding: 18px;
+      border-radius: 14px;
+      border: 2px solid rgba(255,255,255,0.1);
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      font-size: 1.05rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .odd-card:hover {
+      background: #475569;
+      border-color: var(--accent);
+      transform: scale(1.02);
+    }
+
+    /* Feedback Box Overlay */
+    .feedback-box {
+      display: none !important;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 20px;
+      z-index: 500;
+      padding: 30px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      pointer-events: none !important;
+    }
+
+    .feedback-box.active {
+      display: flex !important;
+      pointer-events: auto !important;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .fb-icon {
+      font-size: 4rem;
+      margin-bottom: 10px;
+    }
+
+    .fb-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    .fb-title.correct { color: var(--success); }
+    .fb-title.wrong { color: var(--danger); }
+
+    .fb-desc {
+      font-size: 1.15rem;
+      color: #cbd5e1;
+      max-width: 600px;
+      margin-bottom: 25px;
+      line-height: 1.6;
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    .next-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 14px 36px;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 900;
+      font-family: 'Fredoka', sans-serif;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+      position: relative;
+      z-index: 501;
+    }
+
+    .next-btn:hover {
+      transform: scale(1.05);
+      background: #fbbf24;
+    }
+
+    .penalty-tag {
+      color: #f87171;
+      font-weight: 900;
+      font-size: 1.2rem;
+      margin-top: 5px;
+    }
+
+    .reward-tag {
+      color: #4ade80;
+      font-weight: 900;
+      font-size: 1.2rem;
+      margin-top: 5px;
+    }
+
+    @media (max-width: 640px) {
+      .scoreboard { grid-template-columns: 1fr; }
+      .options-grid, .buckets-grid, .odd-grid { grid-template-columns: 1fr; }
+      .game-container { padding: 15px; min-height: 420px; }
+      .team-score { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Banner -->
+  <div class="header-bar">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-size: 1.5rem;">🏆</span>
+      <h2 style="font-family:'Fredoka', sans-serif; font-size:1.2rem;">sosyal oyun 6b yek</h2>
+    </div>
+    <div class="target-badge">HEDEF: 20 PUAN</div>
+  </div>
+
+  <div class="scoreboard">
+    <div class="team-card p1 active-turn" id="card-p1">
+      <div class="team-header">
+        <span class="team-name" id="name-p1">🟦 1. Grup</span>
+        <span class="team-score" id="score-p1">0 / 20</span>
+      </div>
+      <div class="progress-outer">
+        <div class="progress-inner" id="prog-p1"></div>
+      </div>
+    </div>
+
+    <div class="team-card p2" id="card-p2">
+      <div class="team-header">
+        <span class="team-name" id="name-p2">🟥 2. Grup</span>
+        <span class="team-score" id="score-p2">0 / 20</span>
+      </div>
+      <div class="progress-outer">
+        <div class="progress-inner" id="prog-p2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Game Container -->
+  <div class="game-container">
+    <div class="concept-header">
+      <span class="concept-tag" id="concept-tag">KONSEPT: KATEGORİLEŞTİRME</span>
+      <span class="turn-indicator turn-p1" id="turn-indicator">Sıra: 1. Grup</span>
+    </div>
+
+    <div id="game-area" style="flex-grow:1; display:flex; flex-direction:column; justify-content:center; position:relative; z-index:10;">
+      <!-- Content injected by JS -->
+    </div>
+
+    <!-- Feedback Layer -->
+    <div class="feedback-box" id="feedback-box">
+      <div class="fb-icon" id="fb-icon">🎯</div>
+      <div class="fb-title" id="fb-title">DOĞRU CEVAP!</div>
+      <div id="fb-point" class="reward-tag">+1 Puan</div>
+      <div class="fb-desc" id="fb-desc">Açıklama metni buraya gelecek.</div>
+      <button class="next-btn" id="btn-next-turn" onclick="nextTurn()">DEVAM ET ➔</button>
+    </div>
+  </div>
+
+  <!-- Setup / Start Modal -->
+  <div class="modal-overlay" id="start-modal">
+    <div class="modal-content">
+      <div style="font-size: 3.5rem; margin-bottom: 10px;">👥</div>
+      <h1 class="modal-title">SOSYAL B. YEK OYUN</h1>
+      <p style="color: #cbd5e1; margin-bottom: 20px; font-size: 0.95rem;">
+        6. Sınıf Sosyal Bilgiler YEK Oyunu<br><br>
+        🎯 <b>Kural</b> 20 puana ulaşan ilk grup kazanır!<br>
+        ✅ <b>Doğru Cevap:</b> +1 Puan<br>
+        ❌ <b>Yanlış Cevap:</b> -1 Puan
+      </p>
+
+      <button class="mode-btn" id="btn-start-2p" onclick="startGame('2P')">
+        <span>👥</span> 2 Grup / 2 Oyuncu Yarışsın
+      </button>
+      <button class="mode-btn" id="btn-start-bot" onclick="startGame('BOT')" style="background: #1e293b;">
+        <span>🤖</span> Bilgisayara (Bot) Karşı Oyna
+      </button>
+    </div>
+  </div>
+
+  <!-- Game Over Modal -->
+  <div class="modal-overlay hidden" id="end-modal">
+    <div class="modal-content">
+      <div style="font-size: 4rem; margin-bottom: 10px;">🏆</div>
+      <h1 class="modal-title" id="winner-title">ŞAMPİYON!</h1>
+      <p id="winner-desc" style="font-size: 1.2rem; margin-bottom: 25px; color:#e2e8f0;"></p>
+      <button class="next-btn" onclick="location.reload()">YENİDEN OYNA 🔄</button>
+    </div>
+  </div>
+
+  <script>
+    let audioCtx = null;
+    
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1);
+          osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.2);
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(130, audioCtx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+        }
+      } catch (e) {
+        console.log('Audio playback prevented', e);
+      }
+    }
+
+    let gameMode = '2P';
+    let scores = { p1: 0, p2: 0 };
+    let currentTurn = 'p1';
+    let targetScore = 20;
+    let poolIndex = 0;
+
+    const questionPool = [
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Rol Türünü Doğru Sepete At!',
+        item: 'Evlat Olmak',
+        buckets: [
+          { name: 'Doğuştan Kazanılan Rol', correct: true },
+          { name: 'Sonradan Kazanılan Rol', correct: false }
+        ],
+        explain: 'Evlat, çocuk veya kardeş olmak aile bağlarımızla doğuştan sahip olduğumuz rollerdir.'
+      },
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Rol Türünü Doğru Sepete At!',
+        item: 'Okul Takımı Kaptanı Olmak',
+        buckets: [
+          { name: 'Doğuştan Kazanılan Rol', correct: false },
+          { name: 'Sonradan Kazanılan Rol', correct: true }
+        ],
+        explain: 'Kaptanlık, kendi isteğimiz, çabamız ve başarımızla sonradan kazandığımız bir roldür.'
+      },
+      {
+        concept: 'ODD_ONE_OUT',
+        title: 'Aykırı Olanı Bul! Hangisi bir "Sorumluluk" DEĞİLDİR?',
+        items: [
+          { text: 'Odasını temiz ve düzenli tutmak', correct: false },
+          { text: 'Okulda ücretsiz eğitim almak', correct: true },
+          { text: 'Derslere zamanında girmek', correct: false },
+          { text: 'Ödevlerini zamanında tamamlamak', correct: false }
+        ],
+        explain: 'Okulda eğitim almak temel bir "HAK"tır. Diğer seçenekler ise üstlenmemiz gereken "SORUMLULUK"lardır.'
+      },
+      {
+        concept: 'SCENARIO_MATCH',
+        title: 'Senaryoyu Oku ve Kavramı Bul',
+        scenario: 'Ahmet Bey hastanede doktor olarak çalışmakta, akşam eve geldiğinde ise çocuklarına masal okuyan bir baba olmaktadır.',
+        options: [
+          { text: 'Bir kişi gün içinde farklı roller üstlenebilir.', correct: true },
+          { text: 'Doktorluk doğuştan kazanılan bir roldür.', correct: false },
+          { text: 'Rollerimiz zamanla hiç değişmez.', correct: false },
+          { text: 'Ahmet Bey tek bir gruba üyedir.', correct: false }
+        ],
+        explain: 'İnsanlar gün içinde içinde bulundukları gruba göre doktor, baba, eş veya müşteri gibi farklı rollere sahip olurlar.'
+      },
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Bu Durum Hak mı, Sorumluluk mu?',
+        item: 'Hastalandığımızda hastanede muayene olmak',
+        buckets: [
+          { name: 'Hak', correct: true },
+          { name: 'Sorumluluk', correct: false }
+        ],
+        explain: 'Sağlık hizmetlerinden yararlanmak devletin bize sağladığı temel bir HAKtır.'
+      },
+      {
+        concept: 'ODD_ONE_OUT',
+        title: 'Aykırı Olanı Bul! Hangisi bir "Grup" DEĞİLDİR?',
+        items: [
+          { text: '6-A Sınıfı Öğrencileri', correct: false },
+          { text: 'İzcilik Kulübü Üyeleri', correct: false },
+          { text: 'Otobüs Durağında Bekleyen Kalabalık', correct: true },
+          { text: 'Okul Basketbol Takımı', correct: false }
+        ],
+        explain: 'Durağında bekleyen insanlar bir "Kalabalık"tır. Grubun ortak bir amacı, iş birliği ve düzenli etkileşimi olmalıdır.'
+      },
+      {
+        concept: 'SCENARIO_MATCH',
+        title: 'Hak ve Sorumluluk Dengesi',
+        scenario: 'Zeynep kütüphaneden ödünç kitap alıp okuma hakkını kullanmıştır. Zeynep\'in bu hakka karşılık gelen sorumluluğu nedir?',
+        options: [
+          { text: 'Kitabı zamanında ve yıpratmadan iade etmek', correct: true },
+          { text: 'Kitabı arkadaşına hediye etmek', correct: false },
+          { text: 'Kütüphanede yüksek sesle konuşmak', correct: false },
+          { text: 'Kitabın sayfalarını boyamak', correct: false }
+        ],
+        explain: 'Her hakkın beraberinde getirdiği ödev ve sorumluluklar vardır. Ödünç alınan kitap zamanında iade edilmelidir.'
+      },
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Rol Türünü Seç',
+        item: 'Sınıf Başkanı Olmak',
+        buckets: [
+          { name: 'Doğuştan Kazanılan Rol', correct: false },
+          { name: 'Sonradan Kazanılan Rol', correct: true }
+        ],
+        explain: 'Seçimle veya kendi isteğimizle üstlendiğimiz roller sonradan kazanılır.'
+      },
+      {
+        concept: 'ODD_ONE_OUT',
+        title: 'Aykırı Olanı Bul! Doğuştan Kazanılan Rol Hangisidir?',
+        items: [
+          { text: 'Mimar', correct: false },
+          { text: 'Torun', correct: true },
+          { text: 'Müzisyen', correct: false },
+          { text: 'Sürücü', correct: false }
+        ],
+        explain: 'Torun olmak doğduğumuz aile ile doğrudan gelen doğuştan bir roldür. Mimar, müzisyen ve sürücü sonradan kazanılır.'
+      },
+      {
+        concept: 'SCENARIO_MATCH',
+        title: 'Rollerin Değişimi',
+        scenario: 'Mehmet Ortaokulda öğrenciyken yıllar sonra aynı okula Sosyal Bilgiler Öğretmeni olarak atanmıştır.',
+        options: [
+          { text: 'Zaman içinde rollerimiz ve sorumluluklarımız değişebilir.', correct: true },
+          { text: 'Öğrencilik doğuştan kazanılan bir roldür.', correct: false },
+          { text: 'Rollerimiz hayat boyu sabit kalır.', correct: false },
+          { text: 'Meslekler hiçbir sorumluluk getirmez.', correct: false }
+        ],
+        explain: 'Yaşımız büyüdükçe ve konumumuz değiştikçe sahip olduğumuz sosyal roller ve sorumluluklar da değişir.'
+      },
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Bu Öge Nedir?',
+        item: 'Trafik Kurallarına Uyarak Karşıdan Karşıya Geçmek',
+        buckets: [
+          { name: 'Hak', correct: false },
+          { name: 'Sorumluluk', correct: true }
+        ],
+        explain: 'Trafik kurallarına uymak hem kendi hem de toplum güvenliği için bir sorumluluktur.'
+      },
+      {
+        concept: 'ODD_ONE_OUT',
+        title: 'Aykırı Olanı Bul! Hangisi Okuldaki Sorumluluklarımızdandır?',
+        items: [
+          { text: 'Bayrak töreninde saygı duruşunda bulunmak', correct: true },
+          { text: 'Aileni geçindirmek için çalışmak', correct: false },
+          { text: 'Evin mutfak alışverişini yapmak', correct: false },
+          { text: 'Sınıfı kendi başına boyamak', correct: false }
+        ],
+        explain: 'Bayrak törenine katılmak ve saygı duymak okulda ve bir vatandaş olarak temel sorumluluğumuzdur.'
+      },
+      {
+        concept: 'SCENARIO_MATCH',
+        title: 'Birlikte Yaşam ve Rol Uyumsuzluğu',
+        scenario: 'Gece geç saatte evde yüksek sesle müzik dinleyen Kerem, komşularının rahatsız olmasına yol açmıştır.',
+        options: [
+          { text: 'Kerem haklarını kullanırken başkalarının haklarını ihlal etmiştir.', correct: true },
+          { text: 'Kerem harika bir komşuluk rolü sergilemiştir.', correct: false },
+          { text: 'Evimizde dilediğimiz her şeyi saat kaç olursa olsun yapabiliriz.', correct: false },
+          { text: 'Yüksek sesle müzik dinlemek vatandaşlık görevidir.', correct: false }
+        ],
+        explain: 'Özgürlüklerimiz ve haklarımız, başkalarının haklarının başladığı yerde biter. Sorumlu bir birey çevreye saygılı olur.'
+      },
+      {
+        concept: 'BUCKET_SORT',
+        title: 'Rol Türünü Seç',
+        item: 'Türk Vatandaşı Olmak',
+        buckets: [
+          { name: 'Doğuştan Kazanılan Rol', correct: true },
+          { name: 'Sonradan Kazanılan Rol', correct: false }
+        ],
+        explain: 'Doğduğumuz ülke ve aile ile birlikte vatandaşlık bağımız doğuştan gelir.'
+      },
+      {
+        concept: 'ODD_ONE_OUT',
+        title: 'Aykırı Olanı Bul! Hangisi İzcilik Kulübü Üyesinin Rolüne Uygun DEĞİLDİR?',
+        items: [
+          { text: 'Doğayı ve hayvanları korumak', correct: false },
+          { text: 'Takım çalışmasına uyum sağlamak', correct: false },
+          { text: 'Kamp alanına çöp bırakıp gitmek', correct: true },
+          { text: 'Liderinin talimatlarına uymak', correct: false }
+        ],
+        explain: 'Çevreye zarar vermek hiçbir sosyal rolle ve kulüp üyeliğiyle bağdaşmaz.'
+      }
+    ];
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function startGame(mode) {
+      initAudio();
+      gameMode = mode;
+      
+      const startModal = document.getElementById('start-modal');
+      startModal.classList.add('hidden');
+      
+      if (mode === 'BOT') {
+        document.getElementById('name-p2').innerText = '🤖 Bilgisayar (Bot)';
+      }
+      shuffle(questionPool);
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = questionPool[poolIndex % questionPool.length];
+      const area = document.getElementById('game-area');
+      area.innerHTML = '';
+
+      const turnInd = document.getElementById('turn-indicator');
+      const conceptTag = document.getElementById('concept-tag');
+
+      if (currentTurn === 'p1') {
+        turnInd.className = 'turn-indicator turn-p1';
+        turnInd.innerText = 'Sıra: 1. Grup (Mavi)';
+        document.getElementById('card-p1').classList.add('active-turn');
+        document.getElementById('card-p2').classList.remove('active-turn');
+      } else {
+        turnInd.className = 'turn-indicator turn-p2';
+        turnInd.innerText = gameMode === 'BOT' ? 'Sıra: Bilgisayar (Bot)' : 'Sıra: 2. Grup (Kırmızı)';
+        document.getElementById('card-p2').classList.add('active-turn');
+        document.getElementById('card-p1').classList.remove('active-turn');
+      }
+
+      if (q.concept === 'BUCKET_SORT') {
+        conceptTag.innerText = 'KONSEPT 1: SEPETE AT (SINIFLANDIRMA)';
+        
+        const container = document.createElement('div');
+        container.className = 'sort-container';
+        
+        let bucketsHTML = q.buckets.map((b, idx) => `
+          <button class="bucket-btn" data-correct="${b.correct}">
+            <span style="font-size:1.8rem; pointer-events:none;">📦</span>
+            <span style="pointer-events:none;">${b.name}</span>
+          </button>
+        `).join('');
+
+        container.innerHTML = `
+          <h3 style="text-align:center; color:#cbd5e1; font-size:1.1rem;">${q.title}</h3>
+          <div class="sort-item-card">📌 "${q.item}"</div>
+          <div class="buckets-grid">${bucketsHTML}</div>
+        `;
+        area.appendChild(container);
+
+        // Bind clicks directly
+        container.querySelectorAll('.bucket-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const isCorrect = btn.getAttribute('data-correct') === 'true';
+            handleAnswer(isCorrect, q.explain);
+          });
+        });
+
+      } else if (q.concept === 'SCENARIO_MATCH') {
+        conceptTag.innerText = 'KONSEPT 2: SENARYO VE SOSYAL ANALİZ';
+
+        const container = document.createElement('div');
+        const shuffledOptions = shuffle([...q.options]);
+
+        let optionsHTML = shuffledOptions.map(opt => `
+          <button class="opt-btn" data-correct="${opt.correct}">
+            ${opt.text}
+          </button>
+        `).join('');
+
+        container.innerHTML = `
+          <h3 style="text-align:center; color:#cbd5e1; font-size:1.1rem; margin-bottom:12px;">${q.title}</h3>
+          <div class="scenario-box">📖 ${q.scenario}</div>
+          <div class="options-grid">${optionsHTML}</div>
+        `;
+        area.appendChild(container);
+
+        container.querySelectorAll('.opt-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const isCorrect = btn.getAttribute('data-correct') === 'true';
+            handleAnswer(isCorrect, q.explain);
+          });
+        });
+
+      } else if (q.concept === 'ODD_ONE_OUT') {
+        conceptTag.innerText = 'KONSEPT 3: AYKIRI OLANI / DOĞRUYU BUL';
+
+        const container = document.createElement('div');
+        const shuffledItems = shuffle([...q.items]);
+
+        let itemsHTML = shuffledItems.map(item => `
+          <div class="odd-card" data-correct="${item.correct}">
+            <span style="font-size:1.3rem; pointer-events:none;">⚡</span>
+            <span style="pointer-events:none;">${item.text}</span>
+          </div>
+        `).join('');
+
+        container.innerHTML = `
+          <h3 style="text-align:center; color:#cbd5e1; font-size:1.1rem; margin-bottom:12px;">${q.title}</h3>
+          <div class="odd-grid">${itemsHTML}</div>
+        `;
+        area.appendChild(container);
+
+        container.querySelectorAll('.odd-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const isCorrect = card.getAttribute('data-correct') === 'true';
+            handleAnswer(isCorrect, q.explain);
+          });
+        });
+      }
+
+      if (gameMode === 'BOT' && currentTurn === 'p2') {
+        setTimeout(() => {
+          const isCorrect = Math.random() < 0.75;
+          handleAnswer(isCorrect, q.explain);
+        }, 1200);
+      }
+    }
+
+    function handleAnswer(isCorrect, explanation) {
+      const fbBox = document.getElementById('feedback-box');
+      const fbTitle = document.getElementById('fb-title');
+      const fbIcon = document.getElementById('fb-icon');
+      const fbPoint = document.getElementById('fb-point');
+      const fbDesc = document.getElementById('fb-desc');
+
+      if (isCorrect) {
+        playSound('correct');
+        scores[currentTurn] = Math.min(targetScore, scores[currentTurn] + 1);
+        fbIcon.innerText = '🎉';
+        fbTitle.innerText = 'DOĞRU CEVAP!';
+        fbTitle.className = 'fb-title correct';
+        fbPoint.innerText = '+1 Puan Kazanıldı!';
+        fbPoint.className = 'reward-tag';
+      } else {
+        playSound('wrong');
+        scores[currentTurn] = Math.max(0, scores[currentTurn] - 1);
+        fbIcon.innerText = '❌';
+        fbTitle.innerText = 'YANLIŞ CEVAP!';
+        fbTitle.className = 'fb-title wrong';
+        fbPoint.innerText = '-1 Puan Ceza!';
+        fbPoint.className = 'penalty-tag';
+      }
+
+      fbDesc.innerText = explanation;
+      updateScoreboard();
+
+      if (scores[currentTurn] >= targetScore) {
+        setTimeout(() => showWinner(currentTurn), 500);
+        return;
+      }
+
+      fbBox.classList.add('active');
+    }
+
+    function nextTurn() {
+      const fbBox = document.getElementById('feedback-box');
+      fbBox.classList.remove('active');
+      poolIndex++;
+      currentTurn = (currentTurn === 'p1') ? 'p2' : 'p1';
+      loadQuestion();
+    }
+
+    function updateScoreboard() {
+      document.getElementById('score-p1').innerText = `${scores.p1} / ${targetScore}`;
+      document.getElementById('score-p2').innerText = `${scores.p2} / ${targetScore}`;
+
+      const pctP1 = (scores.p1 / targetScore) * 100;
+      const pctP2 = (scores.p2 / targetScore) * 100;
+
+      document.getElementById('prog-p1').style.width = `${pctP1}%`;
+      document.getElementById('prog-p2').style.width = `${pctP2}%`;
+    }
+
+    function showWinner(winner) {
+      document.getElementById('feedback-box').classList.remove('active');
+      const modal = document.getElementById('end-modal');
+      modal.classList.remove('hidden');
+
+      const title = document.getElementById('winner-title');
+      const desc = document.getElementById('winner-desc');
+
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+      }
+
+      if (winner === 'p1') {
+        title.innerText = '🥇 1. GRUP KAZANDI!';
+        title.style.color = '#60a5fa';
+        desc.innerText = 'Tebrikler! 20 Puana ulaşarak Sosyal Bilgiler Roller ve Gruplar Uzmanı oldunuz!';
+      } else {
+        const winnerName = gameMode === 'BOT' ? 'BİLGİSAYAR' : '2. GRUP';
+        title.innerText = `🥇 ${winnerName} KAZANDI!`;
+        title.style.color = '#f87171';
+        desc.innerText = `${winnerName} 20 puana ulaşarak yarışı tamamladı!`;
+      }
+    }
+  </script>
+</body>
+</html>
