@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6. Sınıf Sosyal Bilgiler - Kültürel Bağlarımız YEK OYUNU</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        space: {
+                            base: '#0F172A',
+                            card: '#1E293B',
+                            dark: '#020617',
+                            border: '#334155'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Fredoka', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0F172A;
+            background-image: 
+                radial-gradient(at 20% 20%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
+                radial-gradient(at 80% 80%, rgba(225, 29, 72, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+    </style>
+</head>
+<body class="text-slate-100 font-sans min-h-screen flex flex-col justify-between p-4 sm:p-6">
+
+    <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col justify-between">
+        <!-- ÜST BAŞLIK -->
+        <header class="text-center py-4">
+            <div class="inline-flex items-center space-x-2 bg-amber-500/10 border border-amber-500/20 px-4 py-1.5 rounded-full text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+                <i class="fa-solid fa-landmark"></i>
+                <span>6. Sınıf Sosyal Bilgiler</span>
+            </div>
+            <h1 class="font-display text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-rose-400 to-indigo-300">
+                KÜLTÜREL BAĞLARIMIZ YEK 6B BİLGİ YARIŞMASI
+            </h1>
+        </header>
+
+        <!-- ANA İÇERİK ALANI -->
+        <main class="flex-1 flex items-center justify-center my-4">
+
+            <!-- VIEW 1: ANA MENÜ -->
+            <div id="homeView" class="max-w-xl w-full space-y-6 text-center">
+                <div class="glass-panel p-8 rounded-3xl border border-space-border space-y-6 shadow-2xl">
+                    <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center text-3xl text-white shadow-lg shadow-amber-500/30">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-bold">Hoş Geldiniz!</h2>
+                        <p class="text-slate-400 text-sm mt-2">Milli kültürümüz, geleneklerimiz, bayramlarımız ve bizi biz yapan değerler konusundaki bilgini test etmeye hazır mısın?</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <button onclick="openSetup('solo')" class="p-5 rounded-2xl bg-space-card hover:bg-space-border border border-space-border text-left transition-all hover:scale-105 group">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg mb-3 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div class="font-display font-bold text-lg">Singleplayer</div>
+                            <div class="text-xs text-slate-400 mt-1">Tek başına kültür yolculuğuna çık ve kendini dene.</div>
+                        </button>
+
+                        <button onclick="openSetup('team')" class="p-5 rounded-2xl bg-space-card hover:bg-space-border border border-space-border text-left transition-all hover:scale-105 group">
+                            <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-lg mb-3 group-hover:bg-rose-500 group-hover:text-white transition-colors">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div class="font-display font-bold text-lg">Takımlı</div>
+                            <div class="text-xs text-slate-400 mt-1">Sınıf içi gruplarla yarışarak birlik ruhunu yaşa.</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: AYARLAR -->
+            <div id="setupView" class="hidden max-w-lg w-full">
+                <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-space-border space-y-6">
+                    <div class="flex items-center justify-between border-b border-space-border pb-4">
+                        <h3 id="setupTitle" class="font-display text-xl font-bold text-white">Yarışma Ayarları</h3>
+                        <button onclick="goHome()" class="text-slate-400 hover:text-white text-sm">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Yarışma Formatı</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button id="fmtWheelBtn" onclick="selectFormat('wheel')" class="p-3 rounded-xl border border-space-border bg-space-dark text-center hover:border-amber-500 transition-all">
+                                    <i class="fa-solid fa-dharmachakra text-xl text-amber-400 mb-1 block"></i>
+                                    <span class="text-xs font-bold block">Çarkıfelek</span>
+                                </button>
+                                <button id="fmtBoxesBtn" onclick="selectFormat('boxes')" class="p-3 rounded-xl border border-space-border bg-space-dark text-center hover:border-amber-500 transition-all">
+                                    <i class="fa-solid fa-cubes text-xl text-rose-400 mb-1 block"></i>
+                                    <span class="text-xs font-bold block">Kutu Kutu Pense</span>
+                                </button>
+                                <button id="fmtClassicBtn" onclick="selectFormat('classic')" class="p-3 rounded-xl border border-space-border bg-space-dark text-center hover:border-amber-500 transition-all">
+                                    <i class="fa-solid fa-list-check text-xl text-indigo-400 mb-1 block"></i>
+                                    <span class="text-xs font-bold block">ElClassico</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Hedef Puan (0 = Sınırsız)</label>
+                            <input type="number" id="customTargetScoreInput" value="400" step="50" min="0" class="w-full bg-space-dark border border-space-border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <div id="teamConfigArea">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-xs font-bold uppercase tracking-wider text-slate-400">Takım Sayısı</label>
+                                <div class="flex space-x-1">
+                                    <button onclick="setTeamCount(2)" id="tBtn2" class="w-8 h-8 rounded-lg bg-rose-500 text-white font-bold text-sm">2</button>
+                                    <button onclick="setTeamCount(3)" id="tBtn3" class="w-8 h-8 rounded-lg bg-space-card font-bold text-sm hover:bg-space-border text-slate-300">3</button>
+                                    <button onclick="setTeamCount(4)" id="tBtn4" class="w-8 h-8 rounded-lg bg-space-card font-bold text-sm hover:bg-space-border text-slate-300">4</button>
+                                </div>
+                            </div>
+                            <div id="teamInputsGrid" class="grid grid-cols-2 gap-2 mt-3"></div>
+                        </div>
+                    </div>
+
+                    <button onclick="confirmAndStart()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-white font-bold font-display shadow-lg hover:scale-[1.02] transition-transform">
+                        Yarışmayı Başlat
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW 3: ARENA (OYUN ALANI) -->
+            <div id="gameArenaView" class="hidden w-full max-w-4xl space-y-6">
+                <!-- PUAN TABLOSU -->
+                <div id="teamScoreboard" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+
+                <!-- AŞAMA 1: ÇARKI FELEK VEYA KUTULAR -->
+                <div id="wheelSection" class="glass-panel p-6 rounded-3xl border border-space-border text-center space-y-4 hidden">
+                    <span id="wheelTurnBadge" class="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xs uppercase tracking-wider"></span>
+                    <div class="relative w-64 h-64 mx-auto">
+                        <canvas id="wheelCanvas" width="256" height="256" class="w-full h-full"></canvas>
+                        <div class="absolute -top-2 left-1/2 -translate-x-1/2 text-rose-500 text-2xl">
+                            <i class="fa-solid fa-caret-down"></i>
+                        </div>
+                    </div>
+                    <button id="spinBtn" onclick="spinWheel()" class="px-8 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold font-display shadow-lg transition-transform active:scale-95">
+                        Çarkı Çevir!
+                    </button>
+                </div>
+
+                <div id="boxesSection" class="glass-panel p-6 rounded-3xl border border-space-border text-center space-y-4 hidden">
+                    <span id="boxTurnBadge" class="inline-block px-3 py-1 rounded-full bg-rose-500/20 text-rose-400 font-bold text-xs uppercase tracking-wider"></span>
+                    <div id="boxesGrid" class="grid grid-cols-5 sm:grid-cols-6 gap-2 max-w-md mx-auto"></div>
+                </div>
+
+                <!-- AŞAMA 2: SORU KARTI -->
+                <div id="questionContainer" class="glass-panel p-6 sm:p-8 rounded-3xl border border-space-border space-y-6 hidden">
+                    <div class="flex justify-between items-center border-b border-space-border pb-3">
+                        <span id="qCategoryBadge" class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xs"></span>
+                        <span id="qPointValue" class="font-display font-extrabold text-rose-400 text-lg"></span>
+                    </div>
+
+                    <h3 id="questionText" class="font-display text-xl sm:text-2xl font-bold text-white leading-relaxed"></h3>
+
+                    <div id="optionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+
+                    <!-- AÇIKLAMA VE SONRAKİ BUTONU -->
+                    <div id="explanationBox" class="p-4 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-200 text-sm hidden">
+                        <span class="font-bold block mb-1 text-amber-400"><i class="fa-solid fa-circle-info mr-1"></i> Kültür Notu:</span>
+                        <p id="explanationText"></p>
+                    </div>
+
+                    <div id="nextBtnContainer" class="text-right hidden">
+                        <button onclick="handleNextStep()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-white font-bold font-display shadow-lg hover:scale-105 transition-transform">
+                            Sonraki Sıra <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: SONUÇ EKRANI -->
+            <div id="resultsView" class="hidden max-w-3xl mx-auto w-full text-center py-4">
+                <div class="glass-panel p-8 rounded-3xl space-y-6 border border-space-border">
+                    <div class="inline-flex p-4 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 text-5xl mb-1 animate-bounce">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+
+                    <div class="space-y-2">
+                        <p class="text-xs font-bold uppercase tracking-widest text-amber-400">Yarışma Bitti!</p>
+                        <h2 id="winnerTitle" class="font-display text-3xl sm:text-5xl font-extrabold text-white">Kazanan Takım!</h2>
+                        <p id="winnerSubtitle" class="text-slate-300 text-sm sm:text-base max-w-md mx-auto"></p>
+                    </div>
+
+                    <div id="finalLeaderboard" class="space-y-2 pt-4 max-w-md mx-auto"></div>
+
+                    <div class="flex flex-col sm:flex-row justify-center gap-3 pt-6">
+                        <button onclick="openSetup(gameMode)" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-white font-bold font-display shadow-lg hover:scale-105 transition-all">
+                            Tekrar Oyna
+                        </button>
+                        <button onclick="goHome()" class="px-6 py-3 rounded-xl bg-space-dark hover:bg-space-border text-slate-200 font-bold font-display border border-space-border transition-colors">
+                            Ana Menü
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="mt-8 text-center text-xs text-slate-500 py-2 border-t border-space-border/30">
+            6. Sınıf Sosyal Bilgiler - Kültürel Bağlarımız | Akıllı, yakışıklı, karizmatik, mükemmel çocuk YEK tarafından yapılmıştır.
+        </footer>
+    </div>
+
+    <script>
+        // --- TAM 40 SORULUK SOSYAL BİLGİLER "KÜLTÜREL BAĞLARIMIZ" SORU HAVUZU ---
+        const QUESTION_POOL = [
+            // ================= MİLLİ VE DİNİ BAYRAMLAR (10 SORU) =================
+            { q: "Aşağıdakilerden hangisi birlik, beraberlik ve paylaşma duygularının öne çıktığı dini bayramlarımızdan biridir?", options: ["29 Ekim Cumhuriyet Bayramı", "Kurban Bayramı", "30 Ağustos Zafer Bayramı", "19 Mayıs Atatürk'ü Anma"], answer: 1, category: "Milli ve Dini Bayramlar", info: "Kurban ve Ramazan bayramları dini bayramlarımız olup yardımlaşma ve akraba ziyaretlerini pekiştirir." },
+            { q: "TBMM'nin açılışı ile çocuklara armağan edilen milli bayramımız hangisidir?", options: ["23 Nisan Ulusal Egemenlik ve Çocuk Bayramı", "19 Mayıs Gençlik Bayramı", "29 Ekim Cumhuriyet Bayramı", "15 Temmuz Demokrasi Günü"], answer: 0, category: "Milli ve Dini Bayramlar", info: "23 Nisan 1920'de TBMM açılmış ve Mustafa Kemal Atatürk bu günü çocuklara armağan etmiştir." },
+            { q: "Aşağıdaki bayramlardan hangisi Türk dünyasında baharın gelişini ve doğanın uyanışını simgeleyen mevsimlik bayramdır?", options: ["Kurban Bayramı", "Nevruz Bayramı", "Zafer Bayramı", "Cumhuriyet Bayramı"], answer: 1, category: "Milli ve Dini Bayramlar", info: "Nevruz, gece ve gündüzün eşitlendiği 21 Mart'ta baharın gelişini müjdeleyen ortak kültür bayramımızdır." },
+            { q: "Kurtuluş Savaşı'nın zaferle sonuçlanmasını kutladığımız milli bayramımız hangisidir?", options: ["19 Mayıs", "23 Nisan", "30 Ağustos Zafer Bayramı", "29 Ekim"], answer: 2, category: "Milli ve Dini Bayramlar", info: "30 Ağustos, Başkomutanlık Meydan Muharebesi'nin zaferle sonuçlandığı milli gurur günümüzdür." },
+            { q: "Hıdırellez geleneği kültürümüzde neyi ifade eder?", options: ["Kışın başlangıcını", "Bahar ve yazın gelişini, bolluk dileklerini", "Savaş zaferini", "Okulların açılmasını"], answer: 1, category: "Milli ve Dini Bayramlar", info: "Hıdırellez, baharın gelişiyle doğanın canlanmasını ve bolluk bereketi temsil eden mevsimlik kutlamadır." },
+            { q: "Aşağıdakilerden hangisi bayram ziyaretlerinde sergilenen kültürel davranışlardan biri DEĞİLDİR?", options: ["Büyüklerin elini öpmek", "Gelen misafirlere ikramda bulunmak", "Akrabalarla bayramlaşmak", "Komşularla küskünlüğü sürdürmek"], answer: 3, category: "Milli ve Dini Bayramlar", info: "Bayramlar kırgınlıkların unutulduğu, barış ve kucaklaşmanın yaşandığı özel günlerdir." },
+            { q: "Mustafa Kemal'in Samsun'a çıkarak Milli Mücadele'yi başlattığı gün hangi milli bayram olarak kutlanır?", options: ["19 Mayıs Atatürk'ü Anma, Gençlik ve Spor Bayramı", "23 Nisan Ulusal Egemenlik Bayramı", "29 Ekim Cumhuriyet Bayramı", "30 Ağustos Zafer Bayramı"], answer: 0, category: "Milli ve Dini Bayramlar", info: "19 Mayıs 1919 Kurtuluş Savaşı'nın meşalesinin yakıldığı gündür ve gençliğe armağan edilmiştir." },
+            { q: "Cumhuriyetimizin ilan edildiği 29 Ekim günü her yıl nasıl kutlanır?", options: ["Dini Bayram", "Milli Bayram", "Mevsimlik Bayram", "Uluslararası Spor Günü"], answer: 1, category: "Milli ve Dini Bayramlar", info: "29 Ekim 1923'te Cumhuriyet ilan edilmiş ve en büyük milli bayramımız olarak kabul edilmiştir." },
+            { q: "Milli bayramlarımızın toplumsal birliğimize sağladığı en temel katkı hangisidir?", options: ["Milli şuur, birlik ve beraberliği güçlendirmesi", "Ticaretin artması", "Tatil süresinin uzaması", "Spor yarışmalarının yapılması"], answer: 0, category: "Milli ve Dini Bayramlar", info: "Milli bayramlar tarihi bilincimizi canlı tutar, milletçe ortak coşku yaşamamızı sağlar." },
+            { q: "Ramazan Bayramı'nda çocukların kapı kapı dolaşıp şeker toplaması kültürümüzün hangi yönünü gösterir?", options: ["Sadece ekonomik faydasını", "Kuşaktan kuşağa aktarılan komşuluk ve sevgi bağını", "Spor faaliyeti olduğunu", "Eğitim faaliyeti olduğunu"], answer: 1, category: "Milli ve Dini Bayramlar", info: "Şeker toplama ve bayramlaşma geleneklerimiz toplumsal kaynaşmayı sağlar." },
+
+            // ================= GELENEK, GÖRENEK VE EL SANATLARI (15 SORU) =================
+            { q: "Toplumda uzun yıllar boyunca uygulana gelen, kuşaktan kuşağa aktarılan alışkanlık ve birikimlere ne denir?", options: ["Kültür", "Ekonomi", "Coğrafya", "Teknoloji"], answer: 0, category: "Kültür ve Değerlerimiz", info: "Kültür; bir toplumun tarihsel süreçte ürettiği maddi ve manevi değerlerin bütünüdür." },
+            { q: "Toprak kaplara şekil verilip fırınlanmasıyla yapılan geleneksel el sanatımız hangisidir?", options: ["Ebru Sanatı", "Çömlekçilik", "Halımacılık", "Bakırcılık"], answer: 1, category: "Geleneksel El Sanatları", info: "Çömlekçilik, özellikle Avanos (Nevşehir) gibi yörelerimizde yaşatılan köklü el sanatımızdır." },
+            { q: "Su üzerine özel boyalar damlatılarak desen oluşturulması ve kâğıda aktarılmasıyla yapılan sanat hangisidir?", options: ["Çini", "Ebru Sanatı", "Hüsn-i Hat", "Oymacılık"], answer: 1, category: "Geleneksel El Sanatları", info: "Ebru sanatı, suyun yüzeyinde renklerle yapılan geleneksel Türk kağıt süsleme sanatıdır." },
+            { q: "Kız isteme, kına gecesi ve asker uğurlama gibi uygulamalar kültürümüzün hangi unsuruna örnektir?", options: ["Dini bayramlara", "Gelenek ve göreneklerimize", "Milli sporumuza", "Yöresel yemeklerimize"], answer: 1, category: "Gelenek ve Görenekler", info: "Bunlar toplumsal dayanışmayı artıran, hayatın önemli dönüm noktalarında uygulanan geleneklerimizdir." },
+            { q: "Geleneksel Türk misafirperverliğinde eve gelen konuğa ilk olarak ne ikram edilir?", options: ["Kahve ve Kolonya/Su", "Dondurma", "Meyve tabağı", "Çorba"], answer: 0, category: "Gelenek ve Görenekler", info: "Misafirperverliğimizin simgesi olarak gelen konuklara kolonya, su ve Türk kahvesi ikram edilir." },
+            { q: "Isparta ve Hereke yörelerinde meşhur olan, ilmek ilmek dokunan geleneksel el sanatımız hangisidir?", options: ["Ahşap Oymacılığı", "Halı ve Kilim Dokumacılığı", "Cam İşlemeciliği", "Bakırcılık"], answer: 1, category: "Geleneksel El Sanatları", info: "Halı ve kilim dokumacılığı, Türk kültürünün duygu ve motiflerini ilmeklerde yaşatan sanatımızdır." },
+            { q: "Göz alıcı renklerle pişirilmiş toprak üzerine yapılan, Kütahya ve İznik ile özdeşleşen süsleme sanatı hangisidir?", options: ["Çinicilik", "Ebru", "Dokumacılık", "Telkari"], answer: 0, category: "Geleneksel El Sanatları", info: "Çinicilik, cami, saray ve evlerimizi süsleyen dünyaca ünlü geleneksel seramik sanatımızdır." },
+            { q: "Mardin Midyat bölgesinde gümüş tellerin bükülmesiyle yapılan ince kuyumculuk sanatı nedir?", options: ["Oltutaşı İşlemeciliği", "Telkari", "Çinicilik", "Ahşap Oyma"], answer: 1, category: "Geleneksel El Sanatları", info: "Telkari, gümüş teller işlenerek yapılan zarif bir el sanatımızdır." },
+            { q: "Erzurum'un Oltu ilçesinden çıkarılan ve tespih, ziynet eşyası yapımında kullanılan siyah renkli taş hangisidir?", options: ["Lüle Taşı", "Oltu Taşı", "Mermer", "Gümüş"], answer: 1, category: "Geleneksel El Sanatları", info: "Oltu taşı, Erzurum yöremize özgü işlenebilir değerli bir madendir." },
+            { q: "Geleneksel Türk tiyatrosunda perdeye yansıtılan gölge oyunu karakterleri kimlerdir?", options: ["Karagöz ve Hacivat", "Keloğlan ve Nasreddin Hoca", "Dede Korkut ve Bamsı Beyrek", "İbiş ve Memiş"], answer: 0, category: "Kültürel Ögeler", info: "Karagöz ve Hacivat, perdede deve derisinden tasvirlerle oynatılan geleneksel gölge oyunumuzdur." },
+            { q: "Kültürün nesilden nesile aktarılmasında en etkili temel araç hangisidir?", options: ["Dil", "Para", "İklim", "Yol"], answer: 0, category: "Kültürel Bağlarımız", info: "Dil, kültürün taşıyıcısıdır. Masallar, türküler ve destanlar dil sayesinde geleceğe aktarılır." },
+            { q: "Aşağıdakilerden hangisi Türk mutfak kültürüne özgü dünyaca bilinen lezzetlerden biridir?", options: ["Pizza", "Sushi", "Türk Kahvesi ve Lokum", "Taco"], answer: 2, category: "Kültür ve Değerlerimiz", info: "Türk kahvesi ve lokum, misafirperverliğimizin ve mutfak kültürümüzün dünyadaki simgelerindendir." },
+            { q: "Geleneksel sporlarımız arasında yer alan ve 'Ata Sporumuz' olarak bilinen etkinlik hangisidir?", options: ["Futbol", "Güreş (Yağlı Güreş)", "Basketbol", "Tenis"], answer: 1, category: "Geleneksel Sporlar", info: "Güreş ve Kırkpınar yağlı güreşleri tarihi geçmişi olan ata sporumuzdur." },
+            { q: "At üzerinde değneklerle oynanan geleneksel Türk sporu aşağıdakilerden hangisidir?", options: ["Cerit", "Golf", "Matrak", "Okçuluk"], answer: 0, category: "Geleneksel Sporlar", info: "Cirit, Türklerin yüzyıllardır at üzerinde oynadığı cesaret ve yetenek isteyen ata spordur." },
+            { q: "Mimaride kubbe ve minareleri süsleyen güzel yazı yazma sanatına ne ad verilir?", options: ["Hüsn-i Hat", "Ebru", "Çini", "Minyatür"], answer: 0, category: "Geleneksel El Sanatları", info: "Hat sanatı, Arap harfleriyle estetik ve ölçülü güzel yazı yazma sanatıdır." },
+
+            // ================= MİLLİ UNSURLAR, MÜZİK VE MİSAFİRPERVERLİK (15 SORU) =================
+            { q: "Düğünlerde, bayramlarda ve özel günlerde yöresel kıyafetlerle oynanan ritmik halk danslarına ne denir?", options: ["Bale", "Halk Oyunları", "Modern Dans", "Tiyatro"], answer: 1, category: "Kültürel Ögeler", info: "Zeybek, Horon, Halay gibi halk oyunlarımız zengin kültürel çeşitliliğimizi yansıtır." },
+            { q: "Ege Bölgesi ile özdeşleşen, yiğitlik ve mertliği temsil eden halk oyunu hangisidir?", options: ["Horon", "Zeybek", "Halay", "Bar"], answer: 1, category: "Kültürel Ögeler", info: "Zeybek, Ege yöresine ait efe ve zeybeklerin oynadığı gururlu bir halk oyunudur." },
+            { q: "Karadeniz Bölgesi'nde kemençe eşliğinde hızlı adımlarla oynanan halk oyunu hangisidir?", options: ["Zeybek", "Horon", "Hora", "Kaşık Oyunu"], answer: 1, category: "Kültürel Ögeler", info: "Horon, Karadeniz'in coşkulu dalgalarını ve hamsinin hareketliliğini simgeleyen halk oyunudur." },
+            { q: "Doğu ve Güneydoğu Anadolu'da davul-zurna eşliğinde el ele tutuşularak oynanan halk oyunu hangisidir?", options: ["Halay", "Zeybek", "Horon", "Tekke"], answer: 0, category: "Kültürel Ögeler", info: "Halay, birlik ve beraberliği en güzel simgeleyen toplu halk oyunlarımızdandır." },
+            { q: "Geleneksel müzik aletlerimizden olan, aşıklarımızın elinde türkülere can veren telli çalgımız hangisidir?", options: ["Gitar", "Bağlama (Saz)", "Piyano", "Keman"], answer: 1, category: "Kültürel Ögeler", info: "Bağlama, Türk halk müziğinin ve ozanlık kültürünün ana çalgısıdır." },
+            { q: "Aşık Veysel, Karacaoğlan ve Yunus Emre gibi şahsiyetler kültürümüzde neyi temsil eder?", options: ["Milli sporcularımızı", "Gönül insanları ve halk ozanlarımızı", "Siyasetçilerimizi", "Ressamlarımızı"], answer: 1, category: "Kültürel Ögeler", info: "Halk ozanlarımız sevgi, hoşgörü ve kültürümüzü şiir ve türkülerle nesillere aktarmıştır." },
+            { q: "İstiklal Marşımızın şairi, milli değerlerimizi şiirleriyle ölümsüzleştiren şahsiyet kimdir?", options: ["Mehmet Akif Ersoy", "Yahya Kemal", "Namık Kemal", "Ziya Gökalp"], answer: 0, category: "Milli Değerlerimiz", info: "Mehmet Akif Ersoy, Milli Şairimiz olup İstiklal Marşı'nın yazarıdır." },
+            { q: "Aşağıdakilerden hangisi milli bağımsızlığımızın ve birliğimizin temel sembollerinden biridir?", options: ["Türk Bayrağı ve İstiklal Marşı", "Yöresel yemekler", "Spor kulüpleri", "Tv kanalları"], answer: 0, category: "Milli Değerlerimiz", info: "Bayrağımız ve İstiklal Marşımız devletimizin ve milletimizin bağımsızlık simgesidir." },
+            { q: "Aksaray ve Eskişehir çevrelerinde imal edilen, beyaz ve yumuşak olup işlenen taş sanatı hangisidir?", options: ["Lüle Taşı", "Oltu Taşı", "Granit", "Kireç Taşı"], answer: 0, category: "Geleneksel El Sanatları", info: "Lüle taşı, Eskişehir'de çıkarılan ve süs eşyası yapımında kullanılan hafif bir taştır." },
+            { q: "Milli kültür unsurlarımızın zaman içinde değişime uğramasının temel nedeni hangisidir?", options: ["Teknoloji ve küreselleşmenin etkisi", "İklimin değişmesi", "Dağların yüksekliği", "Mevsimlerin süresi"], answer: 0, category: "Kültürel Değişim", info: "Teknolojik gelişmeler ve yaşam tarzının değişmesi kültürel ögelerde farklılaşmaya yol açabilir." },
+            { q: "Aşağıdakilerden hangisi kültürümüzün 'yardımlaşma ve dayanışma' yönünü gösteren bir gelenektir?", options: ["Zekat ve imece usulü", "Tek başına tatil yapmak", "Sadece kendi işini yapmak", "Alışveriş yapmak"], answer: 0, category: "Kültür ve Değerlerimiz", info: "İmece, köy ve mahalle halkının ortak işleri el birliğiyle yapması geleneğidir." },
+            { q: "Milli mücadele dönemindeki kahramanlıkları anlatan efsane ve destanlar kültürün hangi ögesine girer?", options: ["Sözlü Edebiyat ve Tarih", "El Sanatları", "Spor", "Mutfak Kültürü"], answer: 0, category: "Kültürel Bağlarımız", info: "Destanlar, efsaneler ve ağıtlar toplumun hafızasını oluşturan sözlü kültür ürünleridir." },
+            { q: "Türk misafirperverliğinde 'Bir fincan kahvenin kırk yıl hatırı vardır' sözü neyi ifade eder?", options: ["Kahvenin pahalı olduğunu", "Sevgi, saygı ve dostluk bağlarının uzun ömürlü olduğunu", "Kahvenin çok içildiğini", "Zamanın çabuk geçtiğini"], answer: 1, category: "Gelenek ve Görenekler", info: "Bu atasözü yapılan küçük bir ikramın ve gösterilen dostluğun unutulmayacağını vurgular." },
+            { q: "Farklı yörelerden insanların bir araya gelerek kültürlerini tanıttığı etkinliklere ne denir?", options: ["Kültür Festivali ve Şenlikler", "Sınav Oturumu", "Fabrika Toplantısı", "Trafik Sayımı"], answer: 0, category: "Kültürel Bağlarımız", info: "Festivaller ve şenlikler farklı kültürlerin kaynaşmasına ve tanınmasına imkan sağlar." },
+            { q: "Tarihteki Türk devletlerinden günümüze ulaşan han, hamam, cami ve köprü gibi eserler ne tür kültür ögesidir?", options: ["Maddi (Somut) Kültür Varlıkları", "Manevi Kültür Varlıkları", "Doğal Varlıklar", "Geçici Varlıklar"], answer: 0, category: "Kültürel Bağlarımız", info: "Mimari yapılar, el sanatları ürünleri toplumun maddi kültür ögelerini oluşturur." }
+        ];
+
+        // --- GLOBAL OYUN DEĞİŞKENLERİ ---
+        let gameMode = 'team';
+        let selectedFormat = 'wheel';
+        let targetScore = 400;
+        let teamCount = 2;
+        let teams = [];
+        let currentTurn = 0;
+        let currentQuestion = null;
+        let currentPointsToWin = 100;
+        let usedQuestions = [];
+        let openedBoxes = new Set();
+
+        const wheelSlices = [
+            { text: "50 P", value: 50, color: "#F59E0B" },
+            { text: "100 P", value: 100, color: "#F43F5E" },
+            { text: "150 P", value: 150, color: "#6366F1" },
+            { text: "200 P", value: 200, color: "#10B981" },
+            { text: "PAS", value: 0, color: "#EF4444" },
+            { text: "250 P", value: 250, color: "#8B5CF6" }
+        ];
+        let currentWheelAngle = 0;
+        let isSpinning = false;
+
+        function goHome() {
+            document.getElementById('setupView').classList.add('hidden');
+            document.getElementById('gameArenaView').classList.add('hidden');
+            document.getElementById('resultsView').classList.add('hidden');
+            document.getElementById('homeView').classList.remove('hidden');
+        }
+
+        function openSetup(mode) {
+            gameMode = mode;
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('setupView').classList.remove('hidden');
+            
+            const teamArea = document.getElementById('teamConfigArea');
+            if (mode === 'solo') {
+                document.getElementById('setupTitle').innerText = "Tek Oyunculu Ayarları";
+                teamArea.classList.add('hidden');
+            } else {
+                document.getElementById('setupTitle').innerText = "Takımlı Yarışma Ayarları";
+                teamArea.classList.remove('hidden');
+                setTeamCount(teamCount);
+            }
+            selectFormat('wheel');
+        }
+
+        function selectFormat(fmt) {
+            selectedFormat = fmt;
+            ['wheel', 'boxes', 'classic'].forEach(f => {
+                const btn = document.getElementById(`fmt${f.charAt(0).toUpperCase() + f.slice(1)}Btn`);
+                if (btn) {
+                    if (f === fmt) {
+                        btn.className = "p-3 rounded-xl border-2 border-amber-500 bg-amber-500/20 text-center transition-all shadow-lg";
+                    } else {
+                        btn.className = "p-3 rounded-xl border border-space-border bg-space-dark text-center hover:border-amber-500 transition-all opacity-70";
+                    }
+                }
+            });
+        }
+
+        function setTeamCount(count) {
+            teamCount = count;
+            [2, 3, 4].forEach(i => {
+                const b = document.getElementById(`tBtn${i}`);
+                if (b) {
+                    if (i === count) b.className = "w-8 h-8 rounded-lg bg-rose-500 text-white font-bold text-sm border border-rose-400 shadow";
+                    else b.className = "w-8 h-8 rounded-lg bg-space-card font-bold text-sm hover:bg-space-border border border-space-border text-slate-300";
+                }
+            });
+
+            const grid = document.getElementById('teamInputsGrid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= count; i++) {
+                grid.innerHTML += `
+                    <div>
+                        <input type="text" id="teamNameInput${i}" value="${i}. Takım" placeholder="${i}. Takım Adı" 
+                        class="w-full bg-space-dark border border-space-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500">
+                    </div>
+                `;
+            }
+        }
+
+        function confirmAndStart() {
+            const val = parseInt(document.getElementById('customTargetScoreInput').value);
+            targetScore = isNaN(val) || val < 0 ? 0 : val;
+
+            teams = [];
+            if (gameMode === 'solo') {
+                teams.push({ name: "Oyuncu 1", score: 0, color: "from-amber-500 to-rose-500" });
+            } else {
+                const colors = [
+                    "from-amber-500 to-orange-500",
+                    "from-rose-500 to-pink-500",
+                    "from-indigo-500 to-blue-500",
+                    "from-emerald-500 to-teal-500"
+                ];
+                for (let i = 1; i <= teamCount; i++) {
+                    const nameVal = document.getElementById(`teamNameInput${i}`)?.value || `${i}. Takım`;
+                    teams.push({ name: nameVal, score: 0, color: colors[i-1] });
+                }
+            }
+
+            currentTurn = 0;
+            usedQuestions = [];
+            openedBoxes.clear();
+
+            document.getElementById('setupView').classList.add('hidden');
+            document.getElementById('gameArenaView').classList.remove('hidden');
+
+            renderScoreboard();
+            setupFormatView();
+        }
+
+        function renderScoreboard() {
+            const board = document.getElementById('teamScoreboard');
+            board.innerHTML = '';
+            teams.forEach((t, idx) => {
+                const isCurrent = idx === currentTurn;
+                board.innerHTML += `
+                    <div class="p-3 rounded-xl bg-gradient-to-br ${t.color} text-white shadow-md relative overflow-hidden ${isCurrent ? 'ring-4 ring-white scale-105' : 'opacity-70'} transition-all">
+                        <div class="text-[10px] uppercase font-bold tracking-wider opacity-80">${t.name}</div>
+                        <div class="font-display text-2xl font-extrabold mt-1">${t.score} <span class="text-xs font-normal">${targetScore > 0 ? '/ ' + targetScore : ''} P</span></div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateTurnBadges() {
+            const activeTeamName = teams[currentTurn].name;
+            document.getElementById('wheelTurnBadge').innerText = `Sıra: ${activeTeamName}`;
+            document.getElementById('boxTurnBadge').innerText = `Sıra: ${activeTeamName}`;
+        }
+
+        function setupFormatView() {
+            const wheelSec = document.getElementById('wheelSection');
+            const boxesSec = document.getElementById('boxesSection');
+            const qContainer = document.getElementById('questionContainer');
+
+            wheelSec.classList.add('hidden');
+            boxesSec.classList.add('hidden');
+            qContainer.classList.add('hidden');
+
+            updateTurnBadges();
+
+            if (selectedFormat === 'wheel') {
+                wheelSec.classList.remove('hidden');
+                drawWheel();
+            } else if (selectedFormat === 'boxes') {
+                boxesSec.classList.remove('hidden');
+                renderBoxesGrid();
+            } else if (selectedFormat === 'classic') {
+                currentPointsToWin = 100;
+                qContainer.classList.remove('hidden');
+                loadNextQuestion();
+            }
+        }
+
+        function drawWheel() {
+            const canvas = document.getElementById('wheelCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const numSlices = wheelSlices.length;
+            const sliceAngle = (2 * Math.PI) / numSlices;
+            const radius = canvas.width / 2;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < numSlices; i++) {
+                const angle = currentWheelAngle + i * sliceAngle;
+                ctx.beginPath();
+                ctx.fillStyle = wheelSlices[i].color;
+                ctx.moveTo(radius, radius);
+                ctx.arc(radius, radius, radius - 10, angle, angle + sliceAngle);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(radius, radius);
+                ctx.rotate(angle + sliceAngle / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#FFFFFF";
+                ctx.font = "bold 18px Fredoka";
+                ctx.fillText(wheelSlices[i].text, radius - 30, 6);
+                ctx.restore();
+            }
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+            document.getElementById('spinBtn').disabled = true;
+
+            const extraRotations = (Math.floor(Math.random() * 5) + 5) * 360;
+            const randomAngle = Math.floor(Math.random() * 360);
+            const totalRotation = extraRotations + randomAngle;
+
+            let startTime = null;
+            const duration = 3000;
+            const startAngle = currentWheelAngle;
+
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                
+                currentWheelAngle = startAngle + (totalRotation * Math.PI / 180) * easeOut;
+                drawWheel();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isSpinning = false;
+                    document.getElementById('spinBtn').disabled = false;
+                    evaluateWheelResult();
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function evaluateWheelResult() {
+            const numSlices = wheelSlices.length;
+            const sliceAngle = (2 * Math.PI) / numSlices;
+            let normalizedAngle = (1.5 * Math.PI - (currentWheelAngle % (2 * Math.PI))) % (2 * Math.PI);
+            if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
+
+            const sliceIndex = Math.floor(normalizedAngle / sliceAngle) % numSlices;
+            const result = wheelSlices[sliceIndex];
+
+            if (result.value === 0) {
+                alert(`${teams[currentTurn].name} PAS geçti! Sıra diğer takıma geçiyor.`);
+                advanceTurn();
+            } else {
+                currentPointsToWin = result.value;
+                document.getElementById('wheelSection').classList.add('hidden');
+                document.getElementById('questionContainer').classList.remove('hidden');
+                loadNextQuestion();
+            }
+        }
+
+        function renderBoxesGrid() {
+            const grid = document.getElementById('boxesGrid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 30; i++) {
+                const isOpen = openedBoxes.has(i);
+                grid.innerHTML += `
+                    <button onclick="openBox(${i})" ${isOpen ? 'disabled' : ''} 
+                        class="h-12 rounded-xl font-display font-bold text-sm transition-all flex items-center justify-center 
+                        ${isOpen ? 'bg-space-dark/50 text-slate-600 border border-space-border/30 cursor-not-allowed' : 'bg-gradient-to-tr from-amber-600 to-rose-600 text-white hover:scale-105 shadow-md'}">
+                        ${isOpen ? '<i class="fa-solid fa-xmark"></i>' : i}
+                    </button>
+                `;
+            }
+        }
+
+        function openBox(boxNum) {
+            if (openedBoxes.has(boxNum)) return;
+            openedBoxes.add(boxNum);
+
+            const boxPoints = [50, 100, 150, 200];
+            currentPointsToWin = boxPoints[Math.floor(Math.random() * boxPoints.length)];
+
+            document.getElementById('boxesSection').classList.add('hidden');
+            document.getElementById('questionContainer').classList.remove('hidden');
+            loadNextQuestion();
+        }
+
+        function loadNextQuestion() {
+            let availableQuestions = QUESTION_POOL.filter((_, idx) => !usedQuestions.includes(idx));
+            if (availableQuestions.length === 0) {
+                usedQuestions = [];
+                availableQuestions = QUESTION_POOL;
+            }
+
+            const randomIdx = Math.floor(Math.random() * availableQuestions.length);
+            const questionObj = availableQuestions[randomIdx];
+            usedQuestions.push(QUESTION_POOL.indexOf(questionObj));
+
+            currentQuestion = questionObj;
+
+            document.getElementById('qCategoryBadge').innerText = questionObj.category;
+            document.getElementById('qPointValue').innerText = `${currentPointsToWin} Puan`;
+            document.getElementById('questionText').innerText = questionObj.q;
+
+            document.getElementById('explanationBox').classList.add('hidden');
+            document.getElementById('nextBtnContainer').classList.add('hidden');
+
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+
+            questionObj.options.forEach((opt, idx) => {
+                grid.innerHTML += `
+                    <button onclick="selectOption(${idx})" id="optBtn${idx}" 
+                        class="option-btn p-4 rounded-xl bg-space-card border border-space-border text-left font-semibold text-white hover:border-amber-500 flex items-center space-x-3">
+                        <span class="w-8 h-8 rounded-lg bg-space-dark flex items-center justify-center text-xs font-bold text-amber-400 border border-space-border">
+                            ${['A', 'B', 'C', 'D'][idx]}
+                        </span>
+                        <span class="flex-1">${opt}</span>
+                    </button>
+                `;
+            });
+        }
+
+        function selectOption(selectedIdx) {
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            const isCorrect = selectedIdx === currentQuestion.answer;
+            const selectedBtn = document.getElementById(`optBtn${selectedIdx}`);
+            const correctBtn = document.getElementById(`optBtn${currentQuestion.answer}`);
+
+            if (isCorrect) {
+                selectedBtn.classList.remove('bg-space-card', 'border-space-border');
+                selectedBtn.classList.add('bg-emerald-600', 'border-emerald-400', 'text-white');
+                
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+
+                teams[currentTurn].score += currentPointsToWin;
+                renderScoreboard();
+
+                if (targetScore > 0 && teams[currentTurn].score >= targetScore) {
+                    setTimeout(() => { finishGame(teams[currentTurn]); }, 1200);
+                    return;
+                }
+            } else {
+                selectedBtn.classList.remove('bg-space-card', 'border-space-border');
+                selectedBtn.classList.add('bg-rose-600', 'border-rose-400', 'text-white');
+
+                correctBtn.classList.remove('bg-space-card', 'border-space-border');
+                correctBtn.classList.add('bg-emerald-600/60', 'border-emerald-400', 'text-white');
+            }
+
+            document.getElementById('explanationText').innerText = currentQuestion.info;
+            document.getElementById('explanationBox').classList.remove('hidden');
+            document.getElementById('nextBtnContainer').classList.remove('hidden');
+        }
+
+        function handleNextStep() {
+            advanceTurn();
+            setupFormatView();
+        }
+
+        function advanceTurn() {
+            if (gameMode === 'team') {
+                currentTurn = (currentTurn + 1) % teams.length;
+            }
+            renderScoreboard();
+        }
+
+        function finishGame(winner) {
+            document.getElementById('gameArenaView').classList.add('hidden');
+            document.getElementById('resultsView').classList.remove('hidden');
+
+            document.getElementById('winnerTitle').innerText = `${winner.name} Kazandı! 🎉`;
+            document.getElementById('winnerSubtitle').innerText = targetScore > 0 
+                ? `${targetScore} puan hedefine ${winner.score} puan alarak ulaştı!`
+                : `Tebrikler! Toplam ${winner.score} puan ile yarışmayı tamamladınız.`;
+
+            const leaderboard = document.getElementById('finalLeaderboard');
+            leaderboard.innerHTML = '';
+            
+            const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
+            sortedTeams.forEach((t, i) => {
+                leaderboard.innerHTML += `
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-space-card border border-space-border text-white my-1">
+                        <div class="flex items-center space-x-3">
+                            <span class="font-bold text-amber-400">#${i + 1}</span>
+                            <span class="font-semibold">${t.name}</span>
+                        </div>
+                        <span class="font-display font-bold text-amber-400">${t.score} Puan</span>
+                    </div>
+                `;
+            });
+
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+        }
+    </script>
+</body>
+</html>
